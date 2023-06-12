@@ -34,7 +34,7 @@ class Word2Vec(Embedder):
         self._model = W2V(**self.kwargs)
 
     def fit(
-        self, walks: List[List[SWalk]], is_update: bool = False
+        self, walks: List[List[SWalk]], is_update: bool = False, mimic_entity = None, mimic_init_original=True
     ) -> Embedder:
         """Fits the Word2Vec model based on provided walks.
 
@@ -49,7 +49,7 @@ class Word2Vec(Embedder):
 
         """
         corpus = [walk for entity_walks in walks for walk in entity_walks]
-        self._model.build_vocab(corpus, update=is_update)
+        self._model.build_vocab(corpus, update=is_update, mimic_in_vocab=mimic_entity, mimic_init_original=mimic_init_original)
         self._model.train(
             corpus,
             total_examples=self._model.corpus_count,

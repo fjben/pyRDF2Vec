@@ -88,7 +88,7 @@ class RDF2VecTransformer:
     _pos_walks = attr.ib(init=False, type=List[int], factory=list)
 
     def fit(
-        self, walks: List[List[SWalk]], is_update: bool = False
+        self, walks: List[List[SWalk]], is_update: bool = False, mimic_entity = None, mimic_init_original = True
     ) -> RDF2VecTransformer:
         """Fits the embeddings based on the provided entities.
 
@@ -106,7 +106,7 @@ class RDF2VecTransformer:
             print(self.embedder)
 
         tic = time.perf_counter()
-        self.embedder.fit(walks, is_update)
+        self.embedder.fit(walks, is_update, mimic_entity, mimic_init_original)
         toc = time.perf_counter()
 
         if self.verbose >= 1:
@@ -296,7 +296,7 @@ class RDF2VecTransformer:
 
 
     def fit_transform_external_walks(
-        self, walks, entities: Entities, is_update: bool = False
+        self, walks, entities: Entities, is_update: bool = False, mimic_init_original: bool = True
         ) -> Tuple[Embeddings, Literals]:
         """Creates a model and generates embeddings and literals for the
         provided entities.
@@ -316,7 +316,7 @@ class RDF2VecTransformer:
         """
         self._is_extract_walks_literals = True
         walks = self.add_walks(walks, entities)
-        self.fit(walks, is_update)
+        self.fit(walks, is_update, mimic_entity=entities, mimic_init_original=mimic_init_original)
         return self.transform_no_literals(entities)
 
     def add_walks(self, walks, entities: Entities):
