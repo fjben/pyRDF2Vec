@@ -88,13 +88,15 @@ class RDF2VecTransformer:
     _pos_entities = attr.ib(init=False, type=List[str], factory=list)
     _pos_walks = attr.ib(init=False, type=List[int], factory=list)
 
-    _filename = attr.ib(
-        default=None,
-        type=Optional[str],
-        validator=[
-            attr.validators.optional(attr.validators.instance_of(str)),
-        ],
-    )
+    ##### this could have been added to rdf2vec.py but then I don't think it would load models trained with original
+    ##### pyrdf2vec library, but need to test
+    # _filename = attr.ib(
+    #     default=None,
+    #     type=Optional[str],
+    #     validator=[
+    #         attr.validators.optional(attr.validators.instance_of(str)),
+    #     ],
+    # )
 
     def fit(
         self, walks: List[List[SWalk]], is_update: bool = False, mimic_entity = None, mimic_init_original = True
@@ -506,7 +508,6 @@ class RDF2VecTransformer:
 
         return my_entity_walks_triples_simple_list_ids
 
-    @staticmethod
     def reload(self) -> RDF2VecTransformer:
         """Loads a RDF2VecTransformer object.
 
