@@ -4,6 +4,7 @@ import asyncio
 import pickle
 import time
 from typing import List, Sequence, Tuple
+from typing import Optional
 
 import attr
 
@@ -86,6 +87,14 @@ class RDF2VecTransformer:
 
     _pos_entities = attr.ib(init=False, type=List[str], factory=list)
     _pos_walks = attr.ib(init=False, type=List[int], factory=list)
+
+    _filename = attr.ib(
+        default=None,
+        type=Optional[str],
+        validator=[
+            attr.validators.optional(attr.validators.instance_of(str)),
+        ],
+    )
 
     def fit(
         self, walks: List[List[SWalk]], is_update: bool = False, mimic_entity = None, mimic_init_original = True
@@ -270,8 +279,8 @@ class RDF2VecTransformer:
                 attr[pos] = tmp.pop(self._pos_walks[i])
             attr += tmp
 
-    @staticmethod
-    def load(filename: str = "transformer_data") -> RDF2VecTransformer:
+    # @staticmethod
+    def load(self, filename: str = "transformer_data") -> RDF2VecTransformer:
         """Loads a RDF2VecTransformer object.
 
         Args:
@@ -288,6 +297,7 @@ class RDF2VecTransformer:
                 raise ValueError(
                     "Failed to load the RDF2VecTransformer object"
                 )
+            self._filename = filename
             return transformer
 
 
@@ -495,3 +505,25 @@ class RDF2VecTransformer:
         # my_entity_walks = [my_entity_walks]
 
         return my_entity_walks_triples_simple_list_ids
+
+    @staticmethod
+    def reload(self) -> RDF2VecTransformer:
+        """Loads a RDF2VecTransformer object.
+
+        Args:
+            filename: The binary file to load the RDF2VecTransformer object.
+
+        Returns:
+            The loaded RDF2VecTransformer.
+
+        """
+        try:
+            with open(self._filename, "rb") as f:
+                transformer = pickle.load(f)
+                if not isinstance(transformer, RDF2VecTransformer):
+                    raise ValueError(
+                        "Failed to load the RDF2VecTransformer object"
+                    )
+                return transformer
+        except:
+            raise Exception("RDF2VecTransformer cannot be reloaded without being previously loaded.")
