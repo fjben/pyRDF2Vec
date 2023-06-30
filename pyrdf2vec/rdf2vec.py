@@ -459,7 +459,11 @@ class RDF2VecTransformer:
         """
 
         my_entity_walks_triples = []
+        # print('my_entity_walks')
+        # print(my_entity_walks)
         for walk in my_entity_walks:
+            # print('walk')
+            # print(walk)
             walk_triples = []
             for idx in range(2, len(walk), 2):
                 walk_triples.append((walk[idx-2], walk[idx-1], walk[idx]))
@@ -481,6 +485,8 @@ class RDF2VecTransformer:
         """
             Transforms a list of triples original names to ids
         """
+        entity_and_relation_same_encoding = True ##### for example, in the INT_DATA entities2id and relation2id both
+                                                 ##### use numbers in the dict
 
         ##### this block was repeated I think, it seems it was using "_hmimic" entitiy instead of original
         # my_entity_walks = self.get_my_entity_walks()
@@ -499,11 +505,30 @@ class RDF2VecTransformer:
         dict_all = self.merge(dict_nodes, dict_relations)
         
         my_entity_walks_triples = self.walks_to_lists_of_simple_walks(self._walks[self.get_idx_of_entity_to_explain(entity_to_explain)])
+        # print('self.get_idx_of_entity_to_explain(entity_to_explain)')
+        # print(self.get_idx_of_entity_to_explain(entity_to_explain))        
+        # print('self._walks[self.get_idx_of_entity_to_explain(entity_to_explain)]')
+        # print(self._walks[self.get_idx_of_entity_to_explain(entity_to_explain)])
+        # print('my_entity_walks_triples')
+        # print(my_entity_walks_triples)
         my_entity_walks_triples_simple_list = self.lists_of_simple_walks_to_list_of_triples(my_entity_walks_triples)
         my_entity_walks_triples_simple_list_ids = []
-        for triple in my_entity_walks_triples_simple_list:
-            new_triple = tuple([item.replace(item, str(dict_all[item])) for item in list(triple)])
-            my_entity_walks_triples_simple_list_ids.append(new_triple)
+        if entity_and_relation_same_encoding:
+            # print('my_entity_walks_triples_simple_list')
+            # print(my_entity_walks_triples_simple_list)
+            for triple in my_entity_walks_triples_simple_list:
+                # print('triple')
+                # print(triple)
+                # raise Exception
+                new_subj = triple[0].replace(triple[0], str(dict_nodes[triple[0]]))
+                new_rel = triple[1].replace(triple[1], str(dict_relations[triple[1]]))
+                new_obj = triple[2].replace(triple[2], str(dict_nodes[triple[2]]))
+                new_triple = tuple([new_subj, new_rel, new_obj])
+                my_entity_walks_triples_simple_list_ids.append(new_triple)
+        else:
+            for triple in my_entity_walks_triples_simple_list:
+                new_triple = tuple([item.replace(item, str(dict_all[item])) for item in list(triple)])
+                my_entity_walks_triples_simple_list_ids.append(new_triple)
         # my_entity_walks = [my_entity_walks]
 
         return my_entity_walks_triples_simple_list_ids
