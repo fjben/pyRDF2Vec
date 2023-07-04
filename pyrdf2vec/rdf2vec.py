@@ -485,7 +485,7 @@ class RDF2VecTransformer:
         """
             Transforms a list of triples original names to ids
         """
-        entity_and_relation_same_encoding = True ##### for example, in the INT_DATA entities2id and relation2id both
+        entity_and_relation_same_encoding_allowed = True ##### for example, in the INT_DATA entities2id and relation2id both
                                                  ##### use numbers in the dict
 
         ##### this block was repeated I think, it seems it was using "_hmimic" entitiy instead of original
@@ -513,7 +513,7 @@ class RDF2VecTransformer:
         # print(my_entity_walks_triples)
         my_entity_walks_triples_simple_list = self.lists_of_simple_walks_to_list_of_triples(my_entity_walks_triples)
         my_entity_walks_triples_simple_list_ids = []
-        if entity_and_relation_same_encoding:
+        if entity_and_relation_same_encoding_allowed:
             # print('my_entity_walks_triples_simple_list')
             # print(my_entity_walks_triples_simple_list)
             for triple in my_entity_walks_triples_simple_list:
