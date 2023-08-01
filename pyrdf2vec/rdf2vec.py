@@ -266,8 +266,11 @@ class RDF2VecTransformer:
             var: The new values to add.
 
         """
+        print(attr)
         if attr is None:
+            print('HERE')
             attr = values
+            print(attr)
         elif isinstance(values[0], str):
             for i, entity in enumerate(values):
                 if entity not in attr:
