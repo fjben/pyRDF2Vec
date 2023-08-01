@@ -134,19 +134,30 @@ class KGExtended(KG):
         return True
 
     def add_targets(self):
+        (target,) = self.target_predicate
+        self._dict_relations[target] = self._alphabet_list[self._id_relation]
+        self._id_relation += 1
+        self._dict_nodes["dummy_node"] = self._id_node
+        self._id_node += 1
+        self._dict_relations["dummy_relation"] = self._alphabet_list[self._id_relation]
+        self._id_relation += 1
         for instance in zip(self.entities, self.labels):
-            (target,) = self.target_predicate
-            self._dict_relations[target] = self._alphabet_list[self._id_relation]
+            (_, target_class) = instance
+            if target_class not in self._dict_nodes.keys():
+                self._dict_nodes[target_class] = self._id_node
+                self._id_node += 1
+                class_dummy_fact = [self._dict_nodes["dummy_node"], self._dict_relations["dummy_relation"], self._dict_nodes[target_class]]
+                self._list_triples.append(class_dummy_fact)
             self._list_targets.append([self._dict_nodes[instance[0]], self._dict_relations[target], self._dict_nodes[instance[1]]])
         return True
 
     def generate_kelpie_files(self, dataset_home, dataset_name, facts_to_explain_home):
         self.add_targets()
-        self._id_relation += 1
+        # self._id_relation += 1
         ##### don't think this is needed anymore, but need to remove lp models or else it gives size mismatch because
         ##### of list of triples but list targets can already be removed
-        self._dict_nodes["dummy_node"] = self._id_node
-        self._id_node += 1
+        # self._dict_nodes["dummy_node"] = self._id_node
+        # self._id_node += 1
         (target,) = self.target_predicate
         target_dummy_fact = [self._dict_nodes["dummy_node"], self._dict_relations[target], self._dict_nodes["dummy_node"]]
         self._list_triples.append(target_dummy_fact)
