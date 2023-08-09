@@ -272,15 +272,22 @@ class RDF2VecTransformer:
             attr = values
             print(attr)
         elif isinstance(values[0], str):
+            print("OR HERE")
             for i, entity in enumerate(values):
                 if entity not in attr:
                     attr.append(entity)
                 else:
                     self._pos_entities.append(attr.index(entity))
                     self._pos_walks.append(i)
+            print(f'len(attr): {len(attr)}')
+            print(f'len(self._pos_entities): {len(self._pos_entities)}')
         else:
+            print("OR EVEN HERE")
+            print(attr)
+            print(len(self._pos_entities))
             tmp = values
             for i, pos in enumerate(self._pos_entities):
+                print(pos)
                 attr[pos] = tmp.pop(self._pos_walks[i])
             attr += tmp
 
