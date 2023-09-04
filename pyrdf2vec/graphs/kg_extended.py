@@ -1,5 +1,7 @@
 ########## NEW: based on graphs/kg.py from pyrdf2vec
 
+import time
+
 from typing import DefaultDict, Dict, List, Optional, Set, Tuple, Union
 from typing import Any
 
@@ -96,6 +98,7 @@ class KGExtended(KG):
                 )
             elif self.location is not None:
                 print("Parsing RDF Graph...")
+                tic = time.perf_counter()
                 g = rdflib.Graph().parse(self.location, format=self.fmt) ##### this parser is non-deterministic it seems
                 print(f'Processing {len(g)} facts...')
                 for subj, pred, obj in g:
@@ -114,6 +117,8 @@ class KGExtended(KG):
                         ),
                         obj,
                     )
+                toc = time.perf_counter()
+                print(f"Parsed and processed RDF Graph in ({toc - tic:0.4f}s)")
         self.generate_kelpie_files(self.dataset_home, self.dataset_name, self.facts_to_explain_home)
 
     def add_fact(self, subj, pred, obj) -> bool:
