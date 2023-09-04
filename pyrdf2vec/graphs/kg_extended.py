@@ -137,16 +137,24 @@ class KGExtended(KG):
         for instance in zip(self.entities, self.labels):
             (target,) = self.target_predicate
             self._dict_relations[target] = self._alphabet_list[self._id_relation]
+
+            ##### if target not in rdf graph
+            if instance[1] not in self._dict_nodes:
+                self._dict_nodes[instance[1]] = self._id_node
+                self._id_node += 1
+                add_target_fact = [self._dict_nodes["dummy_node"], self._dict_relations[target], self._dict_nodes[instance[1]]]
+                self._list_triples.append(add_target_fact)
+
             self._list_targets.append([self._dict_nodes[instance[0]], self._dict_relations[target], self._dict_nodes[instance[1]]])
         return True
 
     def generate_kelpie_files(self, dataset_home, dataset_name, facts_to_explain_home):
+        self._dict_nodes["dummy_node"] = self._id_node
+        self._id_node += 1
         self.add_targets()
         self._id_relation += 1
         ##### don't think this is needed anymore, but need to remove lp models or else it gives size mismatch because
         ##### of list of triples but list targets can already be removed
-        self._dict_nodes["dummy_node"] = self._id_node
-        self._id_node += 1
         (target,) = self.target_predicate
         target_dummy_fact = [self._dict_nodes["dummy_node"], self._dict_relations[target], self._dict_nodes["dummy_node"]]
         self._list_triples.append(target_dummy_fact)
