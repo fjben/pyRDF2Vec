@@ -86,6 +86,13 @@ class KGExtended(KG):
         ],
     )
 
+    generate_kelpie_data = attr.ib(
+        kw_only=True,
+        type=bool,
+        default=True,
+        validator=attr.validators.instance_of(bool),
+    )
+
     def __attrs_post_init__(self):
         if self.location is not None:
             self._is_remote = self.location.startswith(
@@ -119,7 +126,8 @@ class KGExtended(KG):
                     )
                 toc = time.perf_counter()
                 print(f"Parsed and processed RDF Graph in ({toc - tic:0.4f}s)")
-        self.generate_kelpie_files(self.dataset_home, self.dataset_name, self.facts_to_explain_home)
+        if self.generate_kelpie_data:
+            self.generate_kelpie_files(self.dataset_home, self.dataset_name, self.facts_to_explain_home)
 
     def add_fact(self, subj, pred, obj) -> bool:
         subj, pred, obj = str(subj), str(pred), str(obj)
