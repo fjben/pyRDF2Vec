@@ -86,6 +86,22 @@ class KGExtended(KG):
         ],
     )
 
+    train_entities = attr.ib(
+        factory=list,
+        type=List[Any],
+        validator=attr.validators.deep_iterable(
+            member_validator=attr.validators.instance_of(str)
+        ),
+    )
+
+    test_entities = attr.ib(
+        factory=list,
+        type=List[Any],
+        validator=attr.validators.deep_iterable(
+            member_validator=attr.validators.instance_of(str)
+        ),
+    )
+
     generate_kelpie_data = attr.ib(
         kw_only=True,
         type=bool,
@@ -188,8 +204,21 @@ class KGExtended(KG):
         # with open(os.path.join(facts_to_explain_home, 'rdf2vec_' + dataset_name.lower() + '_all.csv'), 'w') as f:
         #     for triple in self._list_targets:
         #         f.write(str(triple[0]) + '\t' + str(triple[1]) + '\t' + str(triple[2]) + '\n')
-        with open(os.path.join(facts_to_explain_home, 'rdf2vec_' + dataset_name.lower() + '_all.csv'), 'w') as f:
+
+        # with open(os.path.join(facts_to_explain_home, 'rdf2vec_' + dataset_name.lower() + '_all.csv'), 'w') as f:
+        #     dict_nodes_reverse = {str(v): k for k, v in self._dict_nodes.items()}
+        #     dict_relations_reverse = {str(v): k for k, v in self._dict_relations.items()}
+        #     for triple in self._list_targets:
+        #         f.write(dict_nodes_reverse[str(triple[0])] + '\t' + dict_relations_reverse[str(triple[1])] + '\t' + dict_nodes_reverse[str(triple[2])] + '\n')
+
+        with open(os.path.join(facts_to_explain_home, 'rdf2vec_' + dataset_name.lower() + '_train_all.csv'), 'w') as f_train, \
+            open(os.path.join(facts_to_explain_home, 'rdf2vec_' + dataset_name.lower() + '_test_all.csv'), 'w') as f_test:
             dict_nodes_reverse = {str(v): k for k, v in self._dict_nodes.items()}
             dict_relations_reverse = {str(v): k for k, v in self._dict_relations.items()}
             for triple in self._list_targets:
-                f.write(dict_nodes_reverse[str(triple[0])] + '\t' + dict_relations_reverse[str(triple[1])] + '\t' + dict_nodes_reverse[str(triple[2])] + '\n')
+                if dict_nodes_reverse[str(triple[0])] in self.train_entities:
+                    f_train.write(dict_nodes_reverse[str(triple[0])] + '\t' + dict_relations_reverse[str(triple[1])] + '\t' + dict_nodes_reverse[str(triple[2])] + '\n')
+                elif dict_nodes_reverse[str(triple[0])] in self.test_entities:
+                    f_test.write(dict_nodes_reverse[str(triple[0])] + '\t' + dict_relations_reverse[str(triple[1])] + '\t' + dict_nodes_reverse[str(triple[2])] + '\n')
+                else:
+                    raise Exception ("Entity not found in among either train entities or test entities.")
