@@ -481,7 +481,7 @@ class RDF2VecTransformer:
 
         return my_entity_walks_triples_simple_list
 
-    def get_my_entity_walks_triples(self, entity_to_explain, entity2id_path, relation2id_path):
+    def get_my_entity_walks_triples(self, entity_to_explain, entity2id_path, relation2id_path, include_entity_walks_in_other_entities=False):
         """
             Transforms a list of triples original names to ids
         """
@@ -503,8 +503,26 @@ class RDF2VecTransformer:
         with open(relation2id_path, 'r') as f:
             dict_relations = json.load(f)
         dict_all = self.merge(dict_nodes, dict_relations)
+
+        my_entity_walks = self._walks[self.get_idx_of_entity_to_explain(entity_to_explain)]
+        # print(my_entity_walks)
+        # raise Exception
+
+        ##### to include walks in other entities walks, this is used in myKelpie/.../random_walks_prefilter to list all
+        ##### the walks in which an entity shows up to then filter further
+        if include_entity_walks_in_other_entities:
+            # other_entities_list = self.transformer._entities[:]
+            other_entities_list = self._entities[:]
+            other_entities_list.remove(entity_to_explain)
+            for entity in other_entities_list:
+                for walk in self._walks[self.get_idx_of_entity_to_explain(entity)]:
+                    if entity_to_explain in walk: 
+                        my_entity_walks.append(walk)
+
+        # print(len(my_entity_walks))
+        # raise Exception        
         
-        my_entity_walks_triples = self.walks_to_lists_of_simple_walks(self._walks[self.get_idx_of_entity_to_explain(entity_to_explain)])
+        my_entity_walks_triples = self.walks_to_lists_of_simple_walks(my_entity_walks)
         # print('self.get_idx_of_entity_to_explain(entity_to_explain)')
         # print(self.get_idx_of_entity_to_explain(entity_to_explain))        
         # print('self._walks[self.get_idx_of_entity_to_explain(entity_to_explain)]')
