@@ -88,6 +88,13 @@ class RDF2VecTransformer:
     _pos_entities = attr.ib(init=False, type=List[str], factory=list)
     _pos_walks = attr.ib(init=False, type=List[int], factory=list)
 
+    with_multiprocessing = attr.ib(
+        kw_only=True,
+        type=Optional[bool],
+        default=True,
+        validator=attr.validators.instance_of(bool),
+    )
+
     ##### this could have been added to rdf2vec.py but then I don't think it would load models trained with original
     ##### pyrdf2vec library, but need to test
     # _filename = attr.ib(
@@ -188,7 +195,7 @@ class RDF2VecTransformer:
         walks: List[List[SWalk]] = []
         tic = time.perf_counter()
         for walker in self.walkers:
-            walks += walker.extract(kg, entities, self.verbose)
+            walks += walker.extract(kg, entities, self.with_multiprocessing, self.verbose)
         toc = time.perf_counter()
 
         self._update(self._entities, entities)

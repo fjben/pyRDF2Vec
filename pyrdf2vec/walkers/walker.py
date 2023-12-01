@@ -16,6 +16,7 @@ from pyrdf2vec.utils.validation import (  # isort: skip
     _check_max_walks,
 )
 
+import copy
 
 class WalkerNotSupported(Exception):
     """Base exception class for the lack of support of a walking strategy for
@@ -107,8 +108,8 @@ class Walker(ABC):
         self.sampler.random_state = self.random_state
 
     def extract(
-        self, kg: KG, entities: Entities, verbose: int = 0
-    ) -> List[List[SWalk]]:
+        self, kg: KG, entities: Entities, with_multiprocessing: bool = True,
+        verbose: int = 0) -> List[List[SWalk]]:
         """Fits the provided sampling strategy and then calls the
         private _extract method that is implemented for each of the
         walking strategies.
@@ -151,14 +152,68 @@ class Walker(ABC):
         if kg._is_remote and kg.mul_req:
             kg._fill_hops(entities)
 
-        with multiprocessing.Pool(process, self._init_worker, [kg]) as pool:
-            res = list(
-                tqdm(
-                    pool.imap(self._proc, entities),
-                    total=len(entities),
-                    disable=True if verbose == 0 else False,
+        # if with_multiprocessing:
+        #     seq = [(kg, entity) for _, entity in enumerate(entities)]
+        #     with multiprocessing.Pool(process) as pool:
+        #         res = list(
+        #             tqdm(
+        #                 pool.imap_unordered(self._proc, seq),
+        #                 total=len(seq),
+        #                 disable=not verbose,
+        #                 # disable=True if verbose == 0 else False,
+        #             )
+        #         )
+
+        #     res = {k: v for element in res for k, v in element.items()}  # type: ignore
+
+
+        if with_multiprocessing:
+
+            # entities_to_extract = [Vertex(entity) for entity in entities]
+            # walks_bulk = self._extract_bulk(kg, entities_to_extract)
+            # res_2 = []
+            # for entity, walks in zip(entities_to_extract, walks_bulk):
+            #     res_2.append({entity.name: list(walks)})
+
+            res = []
+            with multiprocessing.Pool(process, self._init_worker, [kg]) as pool:
+                res = list(
+                    tqdm(
+                        pool.imap(self._proc, entities),
+                        total=len(entities),
+                        disable=True if verbose == 0 else False,
+                    )
                 )
-            )
+
+
+
+
+
+            # print('res_2 == res')
+            # print(res_2 == res)
+
+        else:
+            res = []
+            for entity in tqdm(entities):
+                res.append(self._extract(kg, Vertex(entity)))
+
+                # self._init_worker(kg)
+                # res.append(self._proc(entity))
+
+            # init_kg = copy.deepcopy(kg)
+            # res = []
+            # for entity in tqdm(entities):
+            #     kg = init_kg
+            #     res.append(self._extract(kg, Vertex(entity)))
+
+            # entities_to_extract = [Vertex(entity) for entity in entities]
+            # walks_bulk = self._extract_bulk(kg, entities_to_extract)
+            # res = []
+            # for entity, walks in zip(entities_to_extract, walks_bulk):
+            #     res.append({entity.name: list(walks)})
+
+        # print(res[116])
+
         return self._post_extract(res)
 
     @abstractmethod

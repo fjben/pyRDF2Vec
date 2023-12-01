@@ -7,6 +7,9 @@ from pyrdf2vec.graphs import KG, Vertex
 from pyrdf2vec.typings import EntityWalks, SWalk, Walk
 from pyrdf2vec.walkers import Walker
 
+import rdflib
+
+from tqdm import tqdm
 
 @attr.s
 class RandomWalker(Walker):
@@ -161,3 +164,48 @@ class RandomWalker(Walker):
             ]
             canonical_walks.add(tuple(canonical_walk))
         return {entity.name: list(canonical_walks)}
+    
+    def _extract_bulk(
+            self, kg: KG, entities: list
+        ):
+            """Extracts the walks and processes them for the embedding model.
+
+            Args:
+                kg: The knowledge graph.
+                    The graph from which the neighborhoods are extracted for the
+                    provided instances.
+                instances: The instances to extract the knowledge graph.
+
+            Returns:
+                The 2D matrix with its number of rows equal to the number of
+                provided instances; number of column equal to the embedding size.
+
+            """
+            canonical_walks_bulk = []
+            for entity in tqdm(entities):
+                canonical_walks: Set[SWalk] = set()
+                for walk in self.extract_walks(kg, entity):
+                    canonical_walk: List[str] = [
+                        vertex.name
+                        if i == 0 or i % 2 == 1 or self.md5_bytes is None
+                        else str(md5(vertex.name.encode()).digest()[: self.md5_bytes])
+                        for i, vertex in enumerate(walk)
+                    ]
+                    canonical_walks.add(tuple(canonical_walk))
+                canonical_walks_bulk.append(list(canonical_walks))
+            return canonical_walks_bulk
+            # return {entity.name: list(canonical_walks)}
+    
+            # canonical_walks = set()
+            # for i, entity in enumerate(entities):
+            #     walks = self.extract_walks(kg, entity)
+            #     for walk in walks:
+            #         canonical_walk = []
+            #         for i, hop in enumerate(walk):  # type: ignore
+            #             if i == 0 or i % 2 == 1:
+            #                 canonical_walk.append(str(hop))
+            #             else:
+            #                 digest = md5(str(hop).encode()).digest()[:8]
+            #                 canonical_walk.append(str(digest))
+            #         canonical_walks.add(tuple(canonical_walk))
+            # return canonical_walks
